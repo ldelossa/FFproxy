@@ -74,7 +74,7 @@ func (f *FFproxy) DoProxy(req *http.Request) (*http.Response, error) {
 
 }
 
-// stream method implements our grpc bidirectional server. this method is called on every
+// Stream method implements our grpc bidirectional server. this method is called on every
 // client stream connection. we handle InitRequest messages which act as a handshake with our client.
 // stream abstractions are assigned to the server's stream map on successful handshake.
 func (f *FFproxy) Stream(stream pb.FFProxy_StreamServer) error {
