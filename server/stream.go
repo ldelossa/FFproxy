@@ -29,7 +29,8 @@ type Stream struct {
 }
 
 // NewStream is the constructor method for our stream abstraction
-// receives a grpc stream object and a cancelFunc called on the receive of an error on the grpc stream
+// receives a grpc stream object and a cancelFunc called on the receive of an error on the grpc stream.
+// cancelFunc may be nil
 func NewStream(stream pb.FFProxy_StreamServer, cancelFunc func(streamID string)) *Stream {
 	// create internal send channel
 	c := make(chan *pb.ServerClient, 1024)
@@ -84,7 +85,9 @@ func (s *Stream) Send(msg *pb.ServerClient) (*pb.ClientServer, error) {
 	return csm, nil
 }
 
-// onRecv is called on receiving a *pb.ClientServer_Httpresp and the message to the curently blocking Send() method call.
+// onRecv is called on receiving a *pb.ClientServer_Httpresp. it then looks up the response channel for this request
+// and sends the proto to this channel if exists. sending to the response channel unblocks the caller waiting on
+// s.Send() method.
 func (s *Stream) onRecv(msg *pb.ClientServer) {
 	// extract requestUUID from msg we. know this will pass. see gRPCRxLoop and usage of this function
 	reqID := msg.Clientmsg.(*pb.ClientServer_Httpresp).Httpresp.RequestUUID
