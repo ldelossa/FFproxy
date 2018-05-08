@@ -1,0 +1,53 @@
+syntax = "proto3";
+package proto;
+
+service FFProxy {
+  rpc Stream(stream ClientServer) returns (stream ServerClient) {}
+}
+
+// container message for Client -> Server communication. clients send InitRequest messages to initiate a steam with Server
+// clients send HTTPResponse messages encapsulating the the proxied response into a proto message.
+message ClientServer {
+  oneof clientmsg {
+    InitRequest initreq = 1;
+    HTTPResponse httpresp = 2;
+  }
+}
+
+// InitRequest is the initial client request sent to the server.
+message InitRequest {
+  // opportunistically ask for a hostname. Server may still decide to respond
+  // with a random ID for hostname.
+  string hostname = 1;
+}
+
+// HTTPResponse holds the bytes returned from a call to http.Response.Write(). See: https://golang.org/src/net/http/response.go?s=7618:7661#L229
+message HTTPResponse {
+  // a unique ID representing this Request -> Response http transaction
+  string requestUUID = 1;
+  // a byte array consiting of the results from http.Response.Write method
+  bytes response = 2;
+}
+
+// Container message for Server -> Client communication. Servers respond to client's InitRequest messages. 
+// Servers encapulate http.Request and send them to client
+message ServerClient {
+  oneof servermsg{
+    InitResponse initresp = 1;
+    HTTPRequest httpreq = 2;
+  }
+}
+
+// InitResponse is the response to a client's initial request. 
+message InitResponse {
+  // server defined hostname for the current stream
+  string hostname = 1;
+}
+
+// HTTPRequest holds the bytes returned from a call to http.Request.Write(). See: https://golang.org/src/net/http/request.go?s=16549:16591#L467
+message HTTPRequest {
+  // a unique ID representing this Request -> Response http transaction
+  string requestUUID = 1;
+  // a byte array consisting of the results from http.Request.Write method
+  bytes request = 2;
+}
