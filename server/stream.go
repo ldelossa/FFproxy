@@ -52,7 +52,7 @@ func NewStream(stream pb.FFProxy_StreamServer, cancelFunc func(streamID string))
 	return s
 }
 
-// Stream is the external API for sending a ServerClient message and receiving
+// Send is the external API for sending a ServerClient message and receiving
 // it's response. Callers can block on this method waiting for a response from the stream
 // TODO: plumb context thru this
 func (s *Stream) Send(msg *pb.ServerClient) (*pb.ClientServer, error) {
